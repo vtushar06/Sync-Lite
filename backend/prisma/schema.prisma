@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PATIENT
+  CLINICIAN
+  ADMIN
+}
+
+enum DeviceType {
+  APPLE
+  FITBIT
+  CUSTOM
+}
+
+enum Severity {
+  LOW
+  HIGH
+  CRITICAL
+}
+
+model User {
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  passwordHash        String
+  role                Role                 @default(PATIENT)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  devices             Device[]
+  healthLogs          HealthLog[]
+  alerts              Alert[]
+  clinicianLinks      ClinicianAssignment[] @relation("ClinicianToPatients")
+  patientLinks        ClinicianAssignment[] @relation("PatientToClinicians")
+}
+
+model ClinicianAssignment {
+  id          String   @id @default(cuid())
+  clinicianId String
+  patientId   String
+  createdAt   DateTime @default(now())
+  clinician   User     @relation("ClinicianToPatients", fields: [clinicianId], references: [id], onDelete: Cascade)
+  patient     User     @relation("PatientToClinicians", fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@unique([clinicianId, patientId])
+}
+
+model Device {
+  id           String     @id @default(cuid())
+  userId       String
+  deviceType   DeviceType
+  serialNumber String     @unique
+  createdAt    DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model HealthLog {
+  id               String     @id @default(cuid())
+  userId           String
+  timestamp        DateTime
+  heartRate        Float
+  spO2             Float
+  hrv              Float?
+  isAnomaly        Boolean    @default(false)
+  sourceDeviceType DeviceType
+  createdAt        DateTime   @default(now())
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alerts           Alert[]
+
+  @@index([userId, timestamp])
+}
+
+model Alert {
+  id         String    @id @default(cuid())
+  userId     String
+  logId      String
+  severity   Severity
+  message    String
+  isResolved Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  log        HealthLog @relation(fields: [logId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model ThresholdConfig {
+  id                 String  @id @default("default")
+  maxRestingHeartRate Float   @default(150)
+  minSpO2            Float   @default(90)
+  criticalHeartRate  Float   @default(170)
+  criticalSpO2       Float   @default(85)
+}
