@@ -52,11 +52,11 @@ Client (Web/Mobile) → API Controller → ParserFactory → DeviceParser
 ---
 
 ## Tech Stack
-- **Backend:** Spring Boot (Java)
-- **Database:** PostgreSQL
-- **Auth:** JWT + Spring Security
-- **Testing:** JUnit + Mockito
-- **API Docs:** Swagger/OpenAPI
+- **Backend:** Node.js + Express + TypeScript
+- **Database:** Prisma ORM (SQLite in dev, PostgreSQL-ready schema)
+- **Auth:** JWT + RBAC middleware
+- **Validation & Parsing:** Zod + csv-parse
+- **Frontend:** React + TypeScript (Vite)
 
 ---
 
