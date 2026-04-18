@@ -2,9 +2,9 @@ import { z } from "zod";
 
 const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
-  DATABASE_URL: z.string().default("file:./dev.db"),
+  DATABASE_URL: z.string().min(1),
   JWT_SECRET: z.string().min(16),
-  CORS_ORIGIN: z.string().default("http://localhost:5173")
+  CORS_ORIGIN: z.string().default("http://localhost:5173,https://medisync-web.onrender.com")
 });
 
 const parsed = envSchema.safeParse({

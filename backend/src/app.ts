@@ -8,10 +8,14 @@ import { routes } from "./routes.js";
 
 export const app = express();
 
+const allowedOrigins = env.CORS_ORIGIN.split(",")
+  .map((origin) => origin.trim())
+  .filter((origin) => origin.length > 0);
+
 app.use(helmet());
 app.use(
   cors({
-    origin: env.CORS_ORIGIN
+    origin: allowedOrigins
   })
 );
 app.use(express.json({ limit: "2mb" }));

@@ -1,0 +1,37 @@
+databases:
+  - name: medisync-db
+    plan: free
+    databaseName: medisync
+    user: medisync_user
+
+services:
+  - type: web
+    name: medisync-api
+    plan: free
+    env: node
+    rootDir: backend
+    autoDeploy: true
+    healthCheckPath: /api/health
+    buildCommand: npm install && npm run prisma:generate && npm run build
+    startCommand: npm run start:render
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: medisync-db
+          property: connectionString
+      - key: JWT_SECRET
+        value: 911e780a6ee64907adbc63045eb0f934a113a7cbcfc89c498853c23c9b26688e73d411130da6fc7d5fd9497a0431e2b0
+      - key: CORS_ORIGIN
+        value: https://medisync-web.onrender.com,http://localhost:5173
+
+  - type: static
+    name: medisync-web
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: false
+    envVars:
+      - key: VITE_API_URL
+        value: https://medisync-api.onrender.com/api

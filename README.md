@@ -27,22 +27,20 @@ MediSync is a backend-first health monitoring system that ingests wearable data 
 
 - backend
 - frontend
-- idea.md
-- useCaseDiagram.md
-- sequenceDiagram.md
-- classDiagram.md
-- ErDiagram.md
 
 ## Backend setup
 
-1. Copy environment file:
+1. Create backend environment file:
 
 ```bash
 cd backend
-cp .env.example .env
+cat > .env << 'EOF'
+PORT=4000
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DBNAME?schema=public"
+JWT_SECRET="replace-with-strong-secret"
+CORS_ORIGIN="http://localhost:5173"
+EOF
 ```
-
-2. Set JWT secret in `.env` to a strong value (16+ chars).
 
 3. Install dependencies and generate Prisma client:
 
@@ -52,10 +50,10 @@ npm install
 npm run prisma:generate --workspace backend
 ```
 
-4. Run database migration:
+4. Push Prisma schema:
 
 ```bash
-npm run prisma:migrate --workspace backend
+npm run prisma:push --workspace backend
 ```
 
 5. Start backend:
@@ -68,11 +66,13 @@ Backend runs on `http://localhost:4000`.
 
 ## Frontend setup
 
-1. Copy frontend env file:
+1. Create frontend environment file:
 
 ```bash
 cd frontend
-cp .env.example .env
+cat > .env << 'EOF'
+VITE_API_URL=http://localhost:4000/api
+EOF
 ```
 
 2. Install dependencies (if not already installed from root) and run:
@@ -91,6 +91,16 @@ From repo root:
 ```bash
 npm run build
 ```
+
+## Deployment (Render Blueprint)
+
+Use Render Blueprint with `render.yaml`.
+
+Quick flow:
+
+1. Push this repo to GitHub.
+2. In Render, click `New +` > `Blueprint`.
+3. Select your repo and deploy.
 
 ## API summary
 
