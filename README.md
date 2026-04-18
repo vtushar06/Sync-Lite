@@ -30,13 +30,20 @@ MediSync is a backend-first health monitoring system that ingests wearable data 
 
 ## Backend setup
 
-1. Create backend environment file:
+1. Start local PostgreSQL (Docker):
+
+```bash
+docker rm -f medisync-postgres >/dev/null 2>&1 || true
+docker run --name medisync-postgres -e POSTGRES_USER=medisync -e POSTGRES_PASSWORD=medisync -e POSTGRES_DB=medisync -p 55432:5432 -d postgres:16-alpine
+```
+
+2. Create backend environment file:
 
 ```bash
 cd backend
 cat > .env << 'EOF'
 PORT=4000
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DBNAME?schema=public"
+DATABASE_URL="postgresql://medisync:medisync@localhost:55432/medisync?schema=public"
 JWT_SECRET="replace-with-strong-secret"
 CORS_ORIGIN="http://localhost:5173"
 EOF
@@ -80,6 +87,12 @@ EOF
 ```bash
 cd ..
 npm run dev:frontend
+```
+
+If you are already inside `frontend` folder, use:
+
+```bash
+npm run dev
 ```
 
 Frontend runs on `http://localhost:5173`.

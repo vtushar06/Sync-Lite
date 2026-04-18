@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "dotenv -e .env -- tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js",
-    "start:render": "prisma db push && node dist/server.js",
+    "start": "dotenv -e .env -- node dist/server.js",
+    "start:render": "dotenv -e .env -- prisma db push && dotenv -e .env -- node dist/server.js",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push"
+    "prisma:push": "dotenv -e .env -- prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
@@ -29,6 +29,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.13.11",
+    "dotenv-cli": "^7.4.2",
     "prisma": "^6.6.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"

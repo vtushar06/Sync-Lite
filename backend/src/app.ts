@@ -12,10 +12,24 @@ const allowedOrigins = env.CORS_ORIGIN.split(",")
   .map((origin) => origin.trim())
   .filter((origin) => origin.length > 0);
 
+const localOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
 app.use(helmet());
 app.use(
   cors({
-    origin: allowedOrigins
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.includes(origin) || localOriginPattern.test(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    }
   })
 );
 app.use(express.json({ limit: "2mb" }));
