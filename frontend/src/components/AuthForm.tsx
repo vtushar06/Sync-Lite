@@ -42,7 +42,35 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
 
   return (
     <div className="panel auth-panel">
-      <h2>{mode === "login" ? "Sign in" : "Create account"}</h2>
+      <div className="panel-head auth-head">
+        <div>
+          <p className="kicker">Secure Access</p>
+          <h2>{mode === "login" ? "Welcome back" : "Create your account"}</h2>
+          <p className="muted">
+            {mode === "login"
+              ? "Sign in to continue monitoring your health streams."
+              : "Register a new user profile with role-based access."}
+          </p>
+        </div>
+      </div>
+
+      <div className="mode-switch" role="tablist" aria-label="Authentication mode">
+        <button
+          type="button"
+          className={mode === "login" ? "mode-btn mode-btn-active" : "mode-btn"}
+          onClick={() => setMode("login")}
+        >
+          Sign In
+        </button>
+        <button
+          type="button"
+          className={mode === "register" ? "mode-btn mode-btn-active" : "mode-btn"}
+          onClick={() => setMode("register")}
+        >
+          Register
+        </button>
+      </div>
+
       <form onSubmit={submit} className="stack">
         <label>Email</label>
         <input
@@ -77,15 +105,7 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
         {error ? <p className="error-text">{error}</p> : null}
 
         <button type="submit" disabled={loading}>
-          {loading ? "Please wait" : mode === "login" ? "Login" : "Register"}
-        </button>
-
-        <button
-          type="button"
-          className="ghost"
-          onClick={() => setMode(mode === "login" ? "register" : "login")}
-        >
-          {mode === "login" ? "Need an account? Register" : "Already registered? Login"}
+          {loading ? "Please wait" : mode === "login" ? "Login to Dashboard" : "Create Account"}
         </button>
       </form>
     </div>

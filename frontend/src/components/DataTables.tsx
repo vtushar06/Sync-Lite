@@ -3,13 +3,16 @@ import type { Alert, Device, HealthLog } from "../lib/types";
 export const HealthLogTable = ({ logs }: { logs: HealthLog[] }) => {
   return (
     <div className="panel">
-      <h3>Health Logs</h3>
+      <div className="panel-head">
+        <h3>Health Logs</h3>
+        <span className="panel-count">{logs.length}</span>
+      </div>
       {logs.length === 0 ? <p className="muted">No health logs yet.</p> : null}
       <div className="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Time</th>
+              <th>Recorded At</th>
               <th>HR</th>
               <th>SpO2</th>
               <th>HRV</th>
@@ -40,7 +43,10 @@ export const HealthLogTable = ({ logs }: { logs: HealthLog[] }) => {
 export const AlertTable = ({ alerts }: { alerts: Alert[] }) => {
   return (
     <div className="panel">
-      <h3>Alerts</h3>
+      <div className="panel-head">
+        <h3>Alerts</h3>
+        <span className="panel-count">{alerts.length}</span>
+      </div>
       {alerts.length === 0 ? <p className="muted">No alerts found.</p> : null}
       <div className="table-wrap">
         <table>
@@ -87,7 +93,10 @@ export const AlertTable = ({ alerts }: { alerts: Alert[] }) => {
 export const DeviceTable = ({ devices }: { devices: Device[] }) => {
   return (
     <div className="panel">
-      <h3>Registered Devices</h3>
+      <div className="panel-head">
+        <h3>Registered Devices</h3>
+        <span className="panel-count">{devices.length}</span>
+      </div>
       {devices.length === 0 ? <p className="muted">No devices registered.</p> : null}
       <div className="table-wrap">
         <table>

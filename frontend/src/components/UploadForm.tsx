@@ -59,20 +59,33 @@ export const UploadForm = ({ token, onUploaded }: UploadFormProps) => {
 
   return (
     <div className="panel">
-      <h3>Upload Health Data</h3>
-      <form className="stack" onSubmit={submit}>
-        <label>Device Type</label>
-        <select value={deviceType} onChange={(event) => setDeviceType(event.target.value as DeviceType)}>
-          <option value="APPLE">Apple Watch</option>
-          <option value="FITBIT">Fitbit</option>
-          <option value="CUSTOM">Custom</option>
-        </select>
+      <div className="panel-head">
+        <div>
+          <h3>Data Ingestion</h3>
+          <p className="muted">Upload normalized JSON/CSV payloads from wearable devices.</p>
+        </div>
+        <span className="panel-count">Patient</span>
+      </div>
 
-        <label>Format</label>
-        <select value={format} onChange={(event) => setFormat(event.target.value as "JSON" | "CSV")}> 
-          <option value="JSON">JSON</option>
-          <option value="CSV">CSV</option>
-        </select>
+      <form className="stack" onSubmit={submit}>
+        <div className="inline-fields">
+          <div>
+            <label>Device Type</label>
+            <select value={deviceType} onChange={(event) => setDeviceType(event.target.value as DeviceType)}>
+              <option value="APPLE">Apple Watch</option>
+              <option value="FITBIT">Fitbit</option>
+              <option value="CUSTOM">Custom</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Format</label>
+            <select value={format} onChange={(event) => setFormat(event.target.value as "JSON" | "CSV")}>
+              <option value="JSON">JSON</option>
+              <option value="CSV">CSV</option>
+            </select>
+          </div>
+        </div>
 
         <label>Serial Number</label>
         <input value={serialNumber} onChange={(event) => setSerialNumber(event.target.value)} required />
@@ -83,7 +96,7 @@ export const UploadForm = ({ token, onUploaded }: UploadFormProps) => {
         {error ? <p className="error-text">{error}</p> : null}
         {message ? <p className="ok-text">{message}</p> : null}
 
-        <button type="submit">Submit Upload</button>
+        <button type="submit">Process Upload</button>
       </form>
     </div>
   );

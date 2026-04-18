@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { AuthForm } from "./components/AuthForm";
 import { AlertTable, DeviceTable, HealthLogTable } from "./components/DataTables";
 import { UploadForm } from "./components/UploadForm";
@@ -33,6 +33,14 @@ function App() {
 
   const isClinicianOrAdmin = useMemo(() => user?.role === "CLINICIAN" || user?.role === "ADMIN", [user]);
   const openAlertCount = useMemo(() => alerts.filter((alert) => !alert.isResolved).length, [alerts]);
+  const criticalAlertCount = useMemo(
+    () => alerts.filter((alert) => alert.severity === "CRITICAL" && !alert.isResolved).length,
+    [alerts]
+  );
+  const latestLogTime = useMemo(
+    () => (logs[0] ? new Date(logs[0].timestamp).toLocaleString() : "No logs yet"),
+    [logs]
+  );
 
   const onAuthenticated = (payload: AuthResponse) => {
     setToken(payload.token);
@@ -171,6 +179,21 @@ function App() {
     }
   };
 
+  const submitPatientLookup = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void queryPatientData();
+  };
+
+  const submitThresholdUpdate = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void updateThresholds();
+  };
+
+  const submitAssignment = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void assignClinician();
+  };
+
   useEffect(() => {
     void loadSelfData();
   }, [token, user]);
@@ -181,170 +204,211 @@ function App() {
 
   if (!token || !user) {
     return (
-      <main className="container centered">
-        <section className="hero">
-          <p className="kicker">Wearable Monitoring Platform</p>
+      <main className="landing-shell">
+        <section className="landing-hero">
+          <p className="kicker">Clinical Monitoring Suite</p>
           <h1>MediSync</h1>
-          <p className="muted">
-            Ingest device vitals, normalize data, and monitor anomalies through a focused clinical dashboard.
+          <p className="muted lead">
+            Professional wearable intelligence for patients, clinicians, and administrators in one secure workspace.
           </p>
+          <ul className="hero-points">
+            <li>Unified ingestion for Apple Watch, Fitbit, and CSV sources.</li>
+            <li>Rule-based anomaly detection with traceable alerts.</li>
+            <li>Role-based workflows for patient care and system control.</li>
+          </ul>
         </section>
-        <AuthForm onAuthenticated={onAuthenticated} />
+        <section className="landing-auth-wrap">
+          <AuthForm onAuthenticated={onAuthenticated} />
+        </section>
       </main>
     );
   }
 
   return (
-    <main className="container">
-      <header className="topbar">
-        <div>
-          <h1>MediSync Dashboard</h1>
-          <p className="muted">
-            {user.email} ({user.role})
-          </p>
+    <main className="app-shell">
+      <div className="container">
+        <header className="app-header">
+          <div className="brand-block">
+            <p className="kicker">MediSync Control Center</p>
+            <h1>Patient Monitoring Dashboard</h1>
+            <p className="muted">Signed in as {user.email}</p>
+          </div>
+          <div className="header-actions">
+            <span className={`role-chip role-${user.role.toLowerCase()}`}>{user.role}</span>
+            <button className="danger compact" onClick={logout}>
+              Logout
+            </button>
+          </div>
+        </header>
+
+        {error ? <p className="error-text banner">{error}</p> : null}
+
+        <section className="stat-strip">
+          <article className="stat-card">
+            <p className="stat-label">Health Logs</p>
+            <p className="stat-value">{logs.length}</p>
+            <p className="stat-note">Last update: {latestLogTime}</p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-label">Open Alerts</p>
+            <p className="stat-value">{openAlertCount}</p>
+            <p className="stat-note">Critical open: {criticalAlertCount}</p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-label">Registered Devices</p>
+            <p className="stat-value">{devices.length}</p>
+            <p className="stat-note">Synced to this account</p>
+          </article>
+        </section>
+
+        <div className="content-layout">
+          <section className="content-main">
+            {user.role === "PATIENT" ? <UploadForm token={token} onUploaded={loadSelfData} /> : null}
+
+            <div className="grid two">
+              <HealthLogTable logs={logs} />
+              <AlertTable alerts={alerts} />
+            </div>
+
+            <DeviceTable devices={devices} />
+
+            {patientAlerts.length > 0 && isClinicianOrAdmin ? (
+              <div className="panel">
+                <div className="panel-head">
+                  <h3>Patient Alerts</h3>
+                  <span className="panel-count">{patientAlerts.length}</span>
+                </div>
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Severity</th>
+                        <th>Message</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {patientAlerts.map((alert) => (
+                        <tr key={alert.id}>
+                          <td>{alert.severity}</td>
+                          <td>{alert.message}</td>
+                          <td>{alert.isResolved ? "Resolved" : "Open"}</td>
+                          <td>
+                            {!alert.isResolved ? (
+                              <button className="compact" onClick={() => resolveAlert(alert.id)}>
+                                Resolve
+                              </button>
+                            ) : (
+                              "-"
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
+
+            {patientLogs.length > 0 && isClinicianOrAdmin ? <HealthLogTable logs={patientLogs} /> : null}
+          </section>
+
+          <aside className="content-side">
+            {thresholds ? (
+              <div className="panel">
+                <div className="panel-head">
+                  <h3>Threshold Profile</h3>
+                  <span className="panel-count">Live</span>
+                </div>
+                <div className="threshold-grid">
+                  <p>Max Resting HR: {thresholds.maxRestingHeartRate}</p>
+                  <p>Min SpO2: {thresholds.minSpO2}</p>
+                  <p>Critical HR: {thresholds.criticalHeartRate}</p>
+                  <p>Critical SpO2: {thresholds.criticalSpO2}</p>
+                </div>
+              </div>
+            ) : null}
+
+            {isClinicianOrAdmin ? (
+              <div className="panel">
+                <h3>Patient Lookup</h3>
+                <form className="stack" onSubmit={submitPatientLookup}>
+                  <label>Patient ID</label>
+                  <input value={patientId} onChange={(event) => setPatientId(event.target.value)} />
+                  <button type="submit">Fetch Patient Data</button>
+                </form>
+              </div>
+            ) : null}
+
+            {user.role === "ADMIN" ? (
+              <>
+                <div className="panel">
+                  <h3>Update Thresholds</h3>
+                  <form className="stack" onSubmit={submitThresholdUpdate}>
+                    <label>Max Resting Heart Rate</label>
+                    <input
+                      type="number"
+                      value={maxRestingHeartRate}
+                      onChange={(event) => setMaxRestingHeartRate(Number(event.target.value))}
+                    />
+
+                    <label>Min SpO2</label>
+                    <input
+                      type="number"
+                      value={minSpO2}
+                      onChange={(event) => setMinSpO2(Number(event.target.value))}
+                    />
+
+                    <label>Critical Heart Rate</label>
+                    <input
+                      type="number"
+                      value={criticalHeartRate}
+                      onChange={(event) => setCriticalHeartRate(Number(event.target.value))}
+                    />
+
+                    <label>Critical SpO2</label>
+                    <input
+                      type="number"
+                      value={criticalSpO2}
+                      onChange={(event) => setCriticalSpO2(Number(event.target.value))}
+                    />
+
+                    <button type="submit">Save Thresholds</button>
+                  </form>
+                </div>
+
+                <div className="panel">
+                  <h3>Assign Clinician</h3>
+                  <form className="stack" onSubmit={submitAssignment}>
+                    <label>Clinician</label>
+                    <select value={clinicianId} onChange={(event) => setClinicianId(event.target.value)}>
+                      <option value="">Select clinician</option>
+                      {clinicianUsers.map((entry) => (
+                        <option value={entry.id} key={entry.id}>
+                          {entry.email}
+                        </option>
+                      ))}
+                    </select>
+
+                    <label>Patient</label>
+                    <select value={assignPatientId} onChange={(event) => setAssignPatientId(event.target.value)}>
+                      <option value="">Select patient</option>
+                      {patientUsers.map((entry) => (
+                        <option value={entry.id} key={entry.id}>
+                          {entry.email}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button type="submit">Assign</button>
+                  </form>
+                </div>
+              </>
+            ) : null}
+          </aside>
         </div>
-        <button className="danger" onClick={logout}>
-          Logout
-        </button>
-      </header>
-
-      {error ? <p className="error-text">{error}</p> : null}
-
-      <section className="stats-grid">
-        <article className="stat-card">
-          <p className="stat-label">Health Logs</p>
-          <p className="stat-value">{logs.length}</p>
-        </article>
-        <article className="stat-card">
-          <p className="stat-label">Open Alerts</p>
-          <p className="stat-value">{openAlertCount}</p>
-        </article>
-        <article className="stat-card">
-          <p className="stat-label">Devices</p>
-          <p className="stat-value">{devices.length}</p>
-        </article>
-      </section>
-
-      {user.role === "PATIENT" ? <UploadForm token={token} onUploaded={loadSelfData} /> : null}
-
-      <div className="grid two">
-        <HealthLogTable logs={logs} />
-        <AlertTable alerts={alerts} />
       </div>
-
-      <DeviceTable devices={devices} />
-
-      {thresholds ? (
-        <div className="panel">
-          <h3>Current Thresholds</h3>
-          <div className="threshold-grid">
-            <p>Max Resting HR: {thresholds.maxRestingHeartRate}</p>
-            <p>Min SpO2: {thresholds.minSpO2}</p>
-            <p>Critical HR: {thresholds.criticalHeartRate}</p>
-            <p>Critical SpO2: {thresholds.criticalSpO2}</p>
-          </div>
-        </div>
-      ) : null}
-
-      {isClinicianOrAdmin ? (
-        <div className="panel">
-          <h3>Patient Lookup</h3>
-          <label>Patient ID</label>
-          <input value={patientId} onChange={(event) => setPatientId(event.target.value)} />
-          <button onClick={queryPatientData}>Fetch Patient Data</button>
-        </div>
-      ) : null}
-
-      {patientAlerts.length > 0 && isClinicianOrAdmin ? (
-        <div className="panel">
-          <h3>Patient Alerts (Resolve)</h3>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Severity</th>
-                  <th>Message</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {patientAlerts.map((alert) => (
-                  <tr key={alert.id}>
-                    <td>{alert.severity}</td>
-                    <td>{alert.message}</td>
-                    <td>{alert.isResolved ? "Resolved" : "Open"}</td>
-                    <td>
-                      {!alert.isResolved ? <button onClick={() => resolveAlert(alert.id)}>Resolve</button> : "-"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : null}
-
-      {patientLogs.length > 0 && isClinicianOrAdmin ? <HealthLogTable logs={patientLogs} /> : null}
-
-      {user.role === "ADMIN" ? (
-        <div className="grid two">
-          <div className="panel">
-            <h3>Update Thresholds</h3>
-            <label>Max Resting Heart Rate</label>
-            <input
-              type="number"
-              value={maxRestingHeartRate}
-              onChange={(event) => setMaxRestingHeartRate(Number(event.target.value))}
-            />
-
-            <label>Min SpO2</label>
-            <input type="number" value={minSpO2} onChange={(event) => setMinSpO2(Number(event.target.value))} />
-
-            <label>Critical Heart Rate</label>
-            <input
-              type="number"
-              value={criticalHeartRate}
-              onChange={(event) => setCriticalHeartRate(Number(event.target.value))}
-            />
-
-            <label>Critical SpO2</label>
-            <input
-              type="number"
-              value={criticalSpO2}
-              onChange={(event) => setCriticalSpO2(Number(event.target.value))}
-            />
-
-            <button onClick={updateThresholds}>Save Thresholds</button>
-          </div>
-
-          <div className="panel">
-            <h3>Assign Clinician to Patient</h3>
-
-            <label>Clinician</label>
-            <select value={clinicianId} onChange={(event) => setClinicianId(event.target.value)}>
-              <option value="">Select clinician</option>
-              {clinicianUsers.map((entry) => (
-                <option value={entry.id} key={entry.id}>
-                  {entry.email}
-                </option>
-              ))}
-            </select>
-
-            <label>Patient</label>
-            <select value={assignPatientId} onChange={(event) => setAssignPatientId(event.target.value)}>
-              <option value="">Select patient</option>
-              {patientUsers.map((entry) => (
-                <option value={entry.id} key={entry.id}>
-                  {entry.email}
-                </option>
-              ))}
-            </select>
-
-            <button onClick={assignClinician}>Assign</button>
-          </div>
-        </div>
-      ) : null}
     </main>
   );
 }
