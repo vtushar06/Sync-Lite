@@ -6,9 +6,9 @@ databases:
 
 services:
   - type: web
+    runtime: node
     name: medisync-api
     plan: free
-    env: node
     rootDir: backend
     autoDeploy: true
     healthCheckPath: /api/health
@@ -26,7 +26,8 @@ services:
       - key: CORS_ORIGIN
         value: https://medisync-web.onrender.com,http://localhost:5173
 
-  - type: static
+  - type: web
+    runtime: static
     name: medisync-web
     rootDir: frontend
     buildCommand: npm install && npm run build
