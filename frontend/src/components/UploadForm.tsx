@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { apiRequest } from "../lib/api";
 import type { DeviceType } from "../lib/types";
 
@@ -17,7 +17,9 @@ export const UploadForm = ({ token, onUploaded }: UploadFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const submit = async () => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     try {
       setError(null);
       setMessage(null);
@@ -58,30 +60,31 @@ export const UploadForm = ({ token, onUploaded }: UploadFormProps) => {
   return (
     <div className="panel">
       <h3>Upload Health Data</h3>
+      <form className="stack" onSubmit={submit}>
+        <label>Device Type</label>
+        <select value={deviceType} onChange={(event) => setDeviceType(event.target.value as DeviceType)}>
+          <option value="APPLE">Apple Watch</option>
+          <option value="FITBIT">Fitbit</option>
+          <option value="CUSTOM">Custom</option>
+        </select>
 
-      <label>Device Type</label>
-      <select value={deviceType} onChange={(event) => setDeviceType(event.target.value as DeviceType)}>
-        <option value="APPLE">Apple Watch</option>
-        <option value="FITBIT">Fitbit</option>
-        <option value="CUSTOM">Custom</option>
-      </select>
+        <label>Format</label>
+        <select value={format} onChange={(event) => setFormat(event.target.value as "JSON" | "CSV")}> 
+          <option value="JSON">JSON</option>
+          <option value="CSV">CSV</option>
+        </select>
 
-      <label>Format</label>
-      <select value={format} onChange={(event) => setFormat(event.target.value as "JSON" | "CSV")}>
-        <option value="JSON">JSON</option>
-        <option value="CSV">CSV</option>
-      </select>
+        <label>Serial Number</label>
+        <input value={serialNumber} onChange={(event) => setSerialNumber(event.target.value)} required />
 
-      <label>Serial Number</label>
-      <input value={serialNumber} onChange={(event) => setSerialNumber(event.target.value)} />
+        <label>{format === "JSON" ? "JSON Records" : "CSV Data"}</label>
+        <textarea value={payloadText} onChange={(event) => setPayloadText(event.target.value)} rows={8} required />
 
-      <label>{format === "JSON" ? "JSON Records" : "CSV Data"}</label>
-      <textarea value={payloadText} onChange={(event) => setPayloadText(event.target.value)} rows={8} />
+        {error ? <p className="error-text">{error}</p> : null}
+        {message ? <p className="ok-text">{message}</p> : null}
 
-      {error ? <p className="error-text">{error}</p> : null}
-      {message ? <p className="ok-text">{message}</p> : null}
-
-      <button onClick={submit}>Submit Upload</button>
+        <button type="submit">Submit Upload</button>
+      </form>
     </div>
   );
 };

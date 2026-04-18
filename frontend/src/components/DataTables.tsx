@@ -4,6 +4,7 @@ export const HealthLogTable = ({ logs }: { logs: HealthLog[] }) => {
   return (
     <div className="panel">
       <h3>Health Logs</h3>
+      {logs.length === 0 ? <p className="muted">No health logs yet.</p> : null}
       <div className="table-wrap">
         <table>
           <thead>
@@ -22,7 +23,11 @@ export const HealthLogTable = ({ logs }: { logs: HealthLog[] }) => {
                 <td>{log.heartRate}</td>
                 <td>{log.spO2}</td>
                 <td>{log.hrv ?? "-"}</td>
-                <td>{log.isAnomaly ? "Yes" : "No"}</td>
+                <td>
+                  <span className={log.isAnomaly ? "badge badge-alert" : "badge badge-ok"}>
+                    {log.isAnomaly ? "Yes" : "No"}
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -36,6 +41,7 @@ export const AlertTable = ({ alerts }: { alerts: Alert[] }) => {
   return (
     <div className="panel">
       <h3>Alerts</h3>
+      {alerts.length === 0 ? <p className="muted">No alerts found.</p> : null}
       <div className="table-wrap">
         <table>
           <thead>
@@ -49,9 +55,25 @@ export const AlertTable = ({ alerts }: { alerts: Alert[] }) => {
           <tbody>
             {alerts.map((alert) => (
               <tr key={alert.id}>
-                <td>{alert.severity}</td>
+                <td>
+                  <span
+                    className={`badge ${
+                      alert.severity === "CRITICAL"
+                        ? "badge-critical"
+                        : alert.severity === "HIGH"
+                          ? "badge-high"
+                          : "badge-low"
+                    }`}
+                  >
+                    {alert.severity}
+                  </span>
+                </td>
                 <td>{alert.message}</td>
-                <td>{alert.isResolved ? "Resolved" : "Open"}</td>
+                <td>
+                  <span className={alert.isResolved ? "badge badge-ok" : "badge badge-alert"}>
+                    {alert.isResolved ? "Resolved" : "Open"}
+                  </span>
+                </td>
                 <td>{new Date(alert.createdAt).toLocaleString()}</td>
               </tr>
             ))}
@@ -66,6 +88,7 @@ export const DeviceTable = ({ devices }: { devices: Device[] }) => {
   return (
     <div className="panel">
       <h3>Registered Devices</h3>
+      {devices.length === 0 ? <p className="muted">No devices registered.</p> : null}
       <div className="table-wrap">
         <table>
           <thead>

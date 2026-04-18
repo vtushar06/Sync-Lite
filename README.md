@@ -102,6 +102,11 @@ Quick flow:
 2. In Render, click `New +` > `Blueprint`.
 3. Select your repo and deploy.
 
+When Render prompts for `sync: false` variables, use:
+
+- `VITE_API_URL`: your API public URL with `/api`, for example `https://your-api-service.onrender.com/api`
+- `CORS_ORIGIN`: your frontend public URL, for example `https://your-web-service.onrender.com`
+
 ## API summary
 
 - `POST /api/auth/register`

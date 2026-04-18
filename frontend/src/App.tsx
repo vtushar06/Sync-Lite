@@ -32,6 +32,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   const isClinicianOrAdmin = useMemo(() => user?.role === "CLINICIAN" || user?.role === "ADMIN", [user]);
+  const openAlertCount = useMemo(() => alerts.filter((alert) => !alert.isResolved).length, [alerts]);
 
   const onAuthenticated = (payload: AuthResponse) => {
     setToken(payload.token);
@@ -181,7 +182,13 @@ function App() {
   if (!token || !user) {
     return (
       <main className="container centered">
-        <h1>MediSync</h1>
+        <section className="hero">
+          <p className="kicker">Wearable Monitoring Platform</p>
+          <h1>MediSync</h1>
+          <p className="muted">
+            Ingest device vitals, normalize data, and monitor anomalies through a focused clinical dashboard.
+          </p>
+        </section>
         <AuthForm onAuthenticated={onAuthenticated} />
       </main>
     );
@@ -192,14 +199,31 @@ function App() {
       <header className="topbar">
         <div>
           <h1>MediSync Dashboard</h1>
-          <p>
+          <p className="muted">
             {user.email} ({user.role})
           </p>
         </div>
-        <button onClick={logout}>Logout</button>
+        <button className="danger" onClick={logout}>
+          Logout
+        </button>
       </header>
 
       {error ? <p className="error-text">{error}</p> : null}
+
+      <section className="stats-grid">
+        <article className="stat-card">
+          <p className="stat-label">Health Logs</p>
+          <p className="stat-value">{logs.length}</p>
+        </article>
+        <article className="stat-card">
+          <p className="stat-label">Open Alerts</p>
+          <p className="stat-value">{openAlertCount}</p>
+        </article>
+        <article className="stat-card">
+          <p className="stat-label">Devices</p>
+          <p className="stat-value">{devices.length}</p>
+        </article>
+      </section>
 
       {user.role === "PATIENT" ? <UploadForm token={token} onUploaded={loadSelfData} /> : null}
 
@@ -213,10 +237,12 @@ function App() {
       {thresholds ? (
         <div className="panel">
           <h3>Current Thresholds</h3>
-          <p>
-            maxRestingHeartRate={thresholds.maxRestingHeartRate}, minSpO2={thresholds.minSpO2}, criticalHeartRate=
-            {thresholds.criticalHeartRate}, criticalSpO2={thresholds.criticalSpO2}
-          </p>
+          <div className="threshold-grid">
+            <p>Max Resting HR: {thresholds.maxRestingHeartRate}</p>
+            <p>Min SpO2: {thresholds.minSpO2}</p>
+            <p>Critical HR: {thresholds.criticalHeartRate}</p>
+            <p>Critical SpO2: {thresholds.criticalSpO2}</p>
+          </div>
         </div>
       ) : null}
 
