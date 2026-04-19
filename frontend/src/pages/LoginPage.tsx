@@ -12,7 +12,10 @@ export const LoginPage = () => {
       <div className="login-card">
         <div className="login-brand">
           <div className="login-logo">M</div>
-          <span className="login-name">MediSync</span>
+          <div>
+            <span className="login-name">MediSync</span>
+            <div className="login-tagline">Clinical Health Monitoring</div>
+          </div>
         </div>
         <AuthForm onAuthenticated={login} />
       </div>
