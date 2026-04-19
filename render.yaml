@@ -6,7 +6,7 @@ services:
     rootDir: backend
     autoDeploy: true
     healthCheckPath: /api/health
-    buildCommand: npm install && npm run prisma:generate && npm run build
+    buildCommand: npm install --include=dev && npm run prisma:generate && npm run build
     startCommand: npm run start:render
     envVars:
       - key: NODE_ENV
