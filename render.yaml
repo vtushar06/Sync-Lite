@@ -24,7 +24,7 @@ services:
       - key: JWT_SECRET
         value: 911e780a6ee64907adbc63045eb0f934a113a7cbcfc89c498853c23c9b26688e73d411130da6fc7d5fd9497a0431e2b0
       - key: CORS_ORIGIN
-        sync: false
+        value: https://medisync-web-925n.onrender.com
 
   - type: web
     runtime: static
@@ -35,4 +35,4 @@ services:
     pullRequestPreviewsEnabled: false
     envVars:
       - key: VITE_API_URL
-        sync: false
+        value: https://medisync-api-925n.onrender.com/api
