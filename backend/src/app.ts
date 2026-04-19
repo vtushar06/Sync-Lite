@@ -13,6 +13,7 @@ const allowedOrigins = env.CORS_ORIGIN.split(",")
   .filter((origin) => origin.length > 0);
 
 const localOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+const renderPattern = /^https:\/\/.*\.onrender\.com$/;
 
 app.use(helmet());
 app.use(
@@ -23,7 +24,11 @@ app.use(
         return;
       }
 
-      if (allowedOrigins.includes(origin) || localOriginPattern.test(origin)) {
+      if (
+        allowedOrigins.includes(origin) ||
+        localOriginPattern.test(origin) ||
+        renderPattern.test(origin)
+      ) {
         callback(null, true);
         return;
       }
