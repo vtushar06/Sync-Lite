@@ -12,7 +12,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false
+        value: postgresql://educore_postgres_user:2jdFNpFi14WY4dKM7cJNrlS2c9A6Qb8P@dpg-d7ej8f77f7vs73d7qr7g-a/educore_postgres
       - key: JWT_SECRET
         value: 911e780a6ee64907adbc63045eb0f934a113a7cbcfc89c498853c23c9b26688e73d411130da6fc7d5fd9497a0431e2b0
       - key: CORS_ORIGIN
