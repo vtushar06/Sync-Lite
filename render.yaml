@@ -27,4 +27,4 @@ services:
     pullRequestPreviewsEnabled: false
     envVars:
       - key: VITE_API_URL
-        value: https://medisync-api-925n.onrender.com/api
+        value: https://medisync-api-tmap.onrender.com/api
