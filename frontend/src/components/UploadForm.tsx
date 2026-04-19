@@ -60,11 +60,7 @@ export const UploadForm = ({ token, onUploaded }: UploadFormProps) => {
   return (
     <div className="panel">
       <div className="panel-head">
-        <div>
-          <h3>Data Ingestion</h3>
-          <p className="muted">Upload normalized JSON/CSV payloads from wearable devices.</p>
-        </div>
-        <span className="panel-count">Patient</span>
+        <h3>Upload Data</h3>
       </div>
 
       <form className="stack" onSubmit={submit}>

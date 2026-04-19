@@ -16,22 +16,19 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     try {
       setLoading(true);
       setError(null);
-
       const payload =
         mode === "login"
           ? await apiRequest<AuthResponse>("/auth/login", {
               method: "POST",
-              body: { email, password }
+              body: { email, password },
             })
           : await apiRequest<AuthResponse>("/auth/register", {
               method: "POST",
-              body: { email, password, role }
+              body: { email, password, role },
             });
-
       onAuthenticated(payload);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Authentication failed");
@@ -41,18 +38,10 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
   };
 
   return (
-    <div className="panel auth-panel">
-      <div className="panel-head auth-head">
-        <div>
-          <p className="kicker">Secure Access</p>
-          <h2>{mode === "login" ? "Welcome back" : "Create your account"}</h2>
-          <p className="muted">
-            {mode === "login"
-              ? "Sign in to continue monitoring your health streams."
-              : "Register a new user profile with role-based access."}
-          </p>
-        </div>
-      </div>
+    <>
+      <h2 style={{ fontSize: 17, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 16 }}>
+        {mode === "login" ? "Sign in" : "Create account"}
+      </h2>
 
       <div className="mode-switch" role="tablist" aria-label="Authentication mode">
         <button
@@ -71,43 +60,47 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
         </button>
       </div>
 
-      <form onSubmit={submit} className="stack">
-        <label>Email</label>
-        <input
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          type="email"
-          autoComplete="email"
-          required
-        />
+      <form onSubmit={(e) => void submit(e)} className="stack">
+        <div>
+          <label>Email</label>
+          <input
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            type="email"
+            autoComplete="email"
+            required
+          />
+        </div>
 
-        <label>Password</label>
-        <input
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          type="password"
-          autoComplete={mode === "login" ? "current-password" : "new-password"}
-          required
-          minLength={8}
-        />
+        <div>
+          <label>Password</label>
+          <input
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            type="password"
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
+            required
+            minLength={8}
+          />
+        </div>
 
         {mode === "register" ? (
-          <>
+          <div>
             <label>Role</label>
             <select value={role} onChange={(event) => setRole(event.target.value as Role)}>
               <option value="PATIENT">Patient</option>
               <option value="CLINICIAN">Clinician</option>
               <option value="ADMIN">Admin</option>
             </select>
-          </>
+          </div>
         ) : null}
 
         {error ? <p className="error-text">{error}</p> : null}
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Please wait" : mode === "login" ? "Login to Dashboard" : "Create Account"}
+        <button type="submit" className="primary" disabled={loading} style={{ marginTop: 0 }}>
+          {loading ? "Please wait…" : mode === "login" ? "Sign In" : "Create Account"}
         </button>
       </form>
-    </div>
+    </>
   );
 };
