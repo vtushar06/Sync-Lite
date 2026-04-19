@@ -12,18 +12,24 @@ enum Role {
   PATIENT
   CLINICIAN
   ADMIN
+
+  @@schema("medisync")
 }
 
 enum DeviceType {
   APPLE
   FITBIT
   CUSTOM
+
+  @@schema("medisync")
 }
 
 enum Severity {
   LOW
   HIGH
   CRITICAL
+
+  @@schema("medisync")
 }
 
 model User {
@@ -38,6 +44,8 @@ model User {
   alerts              Alert[]
   clinicianLinks      ClinicianAssignment[] @relation("ClinicianToPatients")
   patientLinks        ClinicianAssignment[] @relation("PatientToClinicians")
+
+  @@schema("medisync")
 }
 
 model ClinicianAssignment {
@@ -49,6 +57,7 @@ model ClinicianAssignment {
   patient     User     @relation("PatientToClinicians", fields: [patientId], references: [id], onDelete: Cascade)
 
   @@unique([clinicianId, patientId])
+  @@schema("medisync")
 }
 
 model Device {
@@ -58,6 +67,8 @@ model Device {
   serialNumber String     @unique
   createdAt    DateTime   @default(now())
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@schema("medisync")
 }
 
 model HealthLog {
@@ -74,6 +85,7 @@ model HealthLog {
   alerts           Alert[]
 
   @@index([userId, timestamp])
+  @@schema("medisync")
 }
 
 model Alert {
@@ -89,6 +101,7 @@ model Alert {
   log        HealthLog @relation(fields: [logId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@schema("medisync")
 }
 
 model ThresholdConfig {
@@ -97,4 +110,6 @@ model ThresholdConfig {
   minSpO2            Float   @default(90)
   criticalHeartRate  Float   @default(170)
   criticalSpO2       Float   @default(85)
+
+  @@schema("medisync")
 }
