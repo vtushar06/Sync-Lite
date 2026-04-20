@@ -105,20 +105,50 @@ From repo root:
 npm run build
 ```
 
-## Deployment (Render Blueprint)
+## Deployment
 
-Use Render Blueprint with `render.yaml`.
+### Production URLs
 
-Quick flow:
+- **Frontend**: https://sync-lite.onrender.com
+- **Backend API**: https://medisync-api-tmap.onrender.com
 
-1. Push this repo to GitHub.
-2. In Render, click `New +` > `Blueprint`.
-3. Select your repo and deploy.
+### Manual Deployment (Recommended)
 
-When Render prompts for `sync: false` variables, use:
+1. **Deploy Backend Web Service**
+   - Render Dashboard → New → Web Service
+   - Select this repository
+   - Settings:
+     - Name: `medisync-api`
+     - Root Directory: `backend`
+     - Build Command: `npm install --include=dev && npm run prisma:generate && npm run build`
+     - Start Command: `npm run start:render`
+   - Environment Variables (set in Render UI, **not in version control**):
+     - `NODE_ENV`: `production`
+     - `DATABASE_URL`: Database connection string
+     - `JWT_SECRET`: 32+ character secure random string
+     - `CORS_ORIGIN`: Frontend URL
 
-- `VITE_API_URL`: your API public URL with `/api`, for example `https://your-api-service.onrender.com/api`
-- `CORS_ORIGIN`: your frontend public URL, for example `https://your-web-service.onrender.com`
+2. **Deploy Frontend Static Site**
+   - Render Dashboard → New → Static Site
+   - Select this repository
+   - Settings:
+     - Name: `medisync-web`
+     - Root Directory: `frontend`
+     - Build Command: `npm install && npm run build`
+     - Publish Directory: `dist`
+   - Environment Variables:
+     - `VITE_API_URL`: Backend API URL with `/api` path
+
+### Blueprint Deployment
+
+Using Render Blueprint with `render.yaml`:
+
+1. Push repository to GitHub
+2. Render Dashboard → Blueprints → New Blueprint
+3. Select repository
+4. Configure environment variables in Render UI:
+   - `DATABASE_URL`: Database connection string
+   - `JWT_SECRET`: Secure random string (32+ characters)
 
 ## API summary
 
